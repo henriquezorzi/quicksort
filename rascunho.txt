@@ -1,0 +1,60 @@
+test("QuickSort original com visualização do pivô", () => {
+        const lista = [5, 2, 8, 1, 9];
+        console.log("\nTestando QuickSort original (elemento do meio como pivô):");
+        console.log("Lista inicial:", lista.join(", "));
+
+        // Função para mostrar qual pivô foi escolhido na implementação original
+        function quickSortComVisualizacao<T>(
+            arr: T[],
+            compFn: (a: T, b: T) => number = (a, b) => String(a).localeCompare(String(b)),
+            profundidade = 0
+        ): T[] {
+            const indent = "  ".repeat(profundidade);
+            
+            if (arr.length <= 1) {
+                console.log(`${indent}> Array com ${arr.length} elemento(s): [${arr.join(", ")}] - já ordenado`);
+                return arr;
+            }
+
+            const pivotIndex = Math.floor(arr.length / 2);
+            const pivot = arr[pivotIndex];
+            
+            // Visualizar o array com o pivô destacado
+            const arrayComPivot = arr.map((val, idx) => 
+                idx === pivotIndex ? `[${val}]` : String(val)
+            ).join(", ");
+            
+            console.log(`${indent}Array: [${arrayComPivot}]`);
+            console.log(`${indent}Pivô escolhido: ${pivot} (posição ${pivotIndex} - elemento do meio)`);
+
+            const menores: T[] = [];
+            const maiores: T[] = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                if (i === pivotIndex) continue;
+
+                if (compFn(arr[i], pivot) <= 0) {
+                    menores.push(arr[i]);
+                } else {
+                    maiores.push(arr[i]);
+                }
+            }
+
+            console.log(`${indent}  < Menores que ${pivot}: [${menores.join(", ")}]`);
+            console.log(`${indent}  > Maiores que ${pivot}: [${maiores.join(", ")}]`);
+
+            const menoresOrdenados = quickSortComVisualizacao(menores, compFn, profundidade + 1);
+            const maioresOrdenados = quickSortComVisualizacao(maiores, compFn, profundidade + 1);
+            
+            const resultado = [...menoresOrdenados, pivot, ...maioresOrdenados];
+            console.log(`${indent}Resultado: [${resultado.join(", ")}]\n`);
+            
+            return resultado;
+        }
+
+        const compFn = (a: number, b: number) => a - b;
+        const resultado = quickSortComVisualizacao(lista, compFn);
+        
+        console.log("Lista final ordenada:", resultado.join(", "));
+        expect(resultado).toEqual([1, 2, 5, 8, 9]);
+    });

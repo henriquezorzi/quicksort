@@ -1,9 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { quickSort } from "../src/quicksort"; 
 
-/**
- * Gera lista de números aleatórios
- */
+// Funções auxiliares mantidas
 function gerarLista(tamanho: number) {
     const lista: number[] = [];
     for (let i = 0; i < tamanho; i++) {
@@ -12,9 +10,6 @@ function gerarLista(tamanho: number) {
     return lista;
 }
 
-/**
- * Verifica se lista está ordenada
- */
 function verificaOrdem(lista: number[]) {
     for (let i = 1; i < lista.length; i++) {
         if (lista[i] < lista[i - 1]) return false;
@@ -33,42 +28,89 @@ describe("Testes em QuickSort", () => {
     });
 
     test("QuickSort com logs (apresentação)", () => {
-        // Lista fixa para mostrar passo a passo
-        const lista = [7, 2, 9, 4, 1, 6];
-        console.log("\n===========================");
-        console.log("📌 Lista inicial:", lista);
+        const lista = [6, 1, 9, 4, 2, 7];
+        console.log("\n===========================================");
+        console.log("  Iniciando QuickSort com a lista:", lista.join(", "));
+        console.log("===========================================\n");
 
-        // Função "espelho" que chama quickSort e exibe cada passo
-        function quickSortComLog(arr: number[], left = 0, right = arr.length - 1): number[] {
-            if (left < right) {
-                const pivot = arr[right];
-                let i = left - 1;
-
-                console.log(`\n🔹 Subarray: [${arr.slice(left, right + 1)}], Pivot = ${pivot}`);
-
-                for (let j = left; j < right; j++) {
-                    if (arr[j] < pivot) {
-                        i++;
-                        [arr[i], arr[j]] = [arr[j], arr[i]];
-                        console.log(`   🔄 Troca -> [${arr}]`);
-                    }
-                }
-
-                [arr[i + 1], arr[right]] = [arr[right], arr[i + 1]];
-                console.log(`   📍 Pivot ${pivot} movido -> [${arr}]`);
-
-                const pivotIndex = i + 1;
-                quickSortComLog(arr, left, pivotIndex - 1);
-                quickSortComLog(arr, pivotIndex + 1, right);
+        function quickSortComLog(arr: number[], left = 0, right = arr.length - 1): void {
+            if (left >= right) {
+                return;
             }
-            return arr;
+
+            const pivot = arr[right];
+            let i = left - 1;
+
+            // Destacar o subarray com o pivô em evidência
+            const subarrayVisualizacao = arr.slice(left, right + 1);
+            const pivotPosicao = subarrayVisualizacao.length - 1;
+            const subarrayComPivot = subarrayVisualizacao.map((val, idx) => 
+                idx === pivotPosicao ? `[${val}]` : val.toString()
+            ).join(", ");
+
+            console.log(`  > Particionando subarray: [${subarrayComPivot}]`);
+            console.log(`  > PIVÔ ESCOLHIDO: ${pivot} (última posição do subarray)`);
+            console.log(`  > Comparando todos os elementos com o pivô ${pivot}:`);
+
+            let trocas = 0;
+            for (let j = left; j < right; j++) {
+                if (arr[j] < pivot) {
+                    i++;
+                    const valorAtual = arr[j];
+                    const valorTroca = arr[i];
+                    
+                    // Só mostra a troca se realmente houver mudança
+                    if (i !== j) {
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                        console.log(`    + ${valorAtual} < ${pivot} (pivô) → Troca: ${valorAtual} <-> ${valorTroca} → [${arr.join(", ")}]`);
+                    } else {
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                        console.log(`    + ${valorAtual} < ${pivot} (pivô) → Já na posição correta → [${arr.join(", ")}]`);
+                    }
+                    trocas++;
+                } else {
+                    console.log(`    - ${arr[j]} >= ${pivot} (pivô) → Fica à direita do pivô`);
+                }
+            }
+
+            const novoPivotIndex = i + 1;
+            const valorPivotPosicao = arr[novoPivotIndex];
+            
+            if (trocas === 0) {
+                console.log(`    INFO: Nenhum elemento menor que ${pivot} foi encontrado`);
+                console.log(`    INFO: Todos os elementos (${arr.slice(left, right).join(", ")}) são >= ${pivot}`);
+            }
+            
+            [arr[novoPivotIndex], arr[right]] = [arr[right], arr[novoPivotIndex]];
+            
+            // Destacar onde o pivô ficou posicionado
+            const arrayComPivotFinal = arr.map((val, idx) => 
+                idx === novoPivotIndex ? `[${val}]` : val.toString()
+            ).join(", ");
+            
+            console.log(`    > Posicionando PIVÔ ${pivot} na posição ${novoPivotIndex} → [${arrayComPivotFinal}]`);
+            
+            const subarraySize = right - left + 1;
+            if (novoPivotIndex === left) {
+                console.log(`    → Pivô ${pivot} é o MENOR do subarray, vai para o INÍCIO (posição ${novoPivotIndex})`);
+            } else if (novoPivotIndex === right) {
+                console.log(`    → Pivô ${pivot} é o MAIOR do subarray, vai para o FIM (posição ${novoPivotIndex})`);
+            } else {
+                console.log(`    → Pivô ${pivot} fica entre menores e maiores (posição ${novoPivotIndex})`);
+            }
+            console.log();
+
+            quickSortComLog(arr, left, novoPivotIndex - 1);
+            quickSortComLog(arr, novoPivotIndex + 1, right);
         }
 
-        const resultado = quickSortComLog([...lista]);
+        const listaParaOrdenar = [...lista];
+        quickSortComLog(listaParaOrdenar);
 
-        console.log("✅ Lista final:", resultado);
-        console.log("===========================\n");
+        console.log("===========================================");
+        console.log("  Processo concluído. Lista final:", listaParaOrdenar.join(", "));
+        console.log("===========================================\n");
 
-        expect(verificaOrdem(resultado)).toBe(true);
+        expect(verificaOrdem(listaParaOrdenar)).toBe(true);
     });
 });
